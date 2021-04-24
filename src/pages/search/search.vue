@@ -1,28 +1,57 @@
 <template>
   <div class="search">
     <div class="search-head">
-      <input type="text" placeholder="音乐/歌手" class="search-input">
+      <input v-model.trim="searchValue" type="text" placeholder="音乐/歌手" class="search-input" @keyup.enter="onEnter">
     </div>
-    <music-list>
-
-    </music-list>
+    <music-list
+      ref="musicList"
+      :list="list"
+      @select="selectItem"
+    />
   </div>
 </template>
 
 <script>
 import MusicList from '@/components/music-list/music-list'
+
+import {search} from '@/api'
+import formatSongs from '@/utils/song'
+
+import { mapActions } from 'vuex'
+
 export default {
   components: {
     MusicList
+  },
+  data() {
+    return {
+      searchValue: '',
+      list: []
+    }
+  },
+  methods: {
+    onEnter() {
+      if (this.searchValue.replace(/(^\s+)|(\s+$)/g, '') === '') {
+        console.log('搜索内容不能为空！');
+        return;
+      }
+      search(this.searchValue).then(res => {
+        this.list = formatSongs(res.data.result.songs);
+      })
+    },
+    selectItem(music) {
+      this.selectAddPlay(music)
+    },
+    ...mapActions(['selectAddPlay'])
   }
-}
+};
 </script>
 
 <style lang="less" scoped>
 .search {
   position: relative;
   width: 100%;
-  height: 100%;
+  height: calc(~'100% - 60px');
   .search-head {
     display: flex;
     height: 40px;
@@ -45,6 +74,10 @@ export default {
     &::placeholder {
       color: @text_color;
     }
+  }
+  .musicList {
+    width: 100%;
+    height: calc(~'100% - 60px');
   }
 }
 </style>

@@ -20,7 +20,7 @@ export default {
   height: 60px;
   font-size: 0;
   white-space: nowrap;
-  overflow-x: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   span {
     display: inline-block;
