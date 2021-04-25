@@ -1,17 +1,18 @@
 <template>
+  <!--选项-->
   <div class="music-btn">
     <router-link to="/music/playlist" tag="span">正在播放</router-link>
     <router-link to="/music/toplist" tag="span">推荐</router-link>
     <router-link to="/music/search" tag="span">搜索</router-link>
-    <router-link to="/music/userlist" tag="span">我的歌单</router-link>
+    <router-link to="/music/userlist" tag="span">
+      我的歌单
+    </router-link>
     <router-link to="/music/historylist" tag="span">我听过的</router-link>
   </div>
 </template>
 
 <script>
-export default {
-
-}
+export default {}
 </script>
 
 <style lang="less" scoped>

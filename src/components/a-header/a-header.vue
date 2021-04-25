@@ -1,7 +1,7 @@
 <template>
   <header class="a-header">
     <h1 class="header">
-      一个在线音乐播放器
+      一个音乐播放器
     </h1>
   </header>
 </template>

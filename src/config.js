@@ -1,5 +1,8 @@
 // 默认分页数量
-export const defaultLimit = 30
+export const defaultLimit = 100
+
+// 默认音量
+export const defaultVolume = 0.8
 
 /**
  * 播放模式

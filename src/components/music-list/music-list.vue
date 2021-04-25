@@ -25,6 +25,17 @@
                 :size="40"
                 @click.stop="selectItem(item,index)"
               />
+              <a-icon
+                class="hover"
+                type="ic_favorite_border"
+                :size="40"
+              />
+              <a-icon
+                v-if="listType !== 1"
+                class="hover"
+                type="ic_playlist_add"
+                :size="40"
+              />
             </div>
           </div>
           <span class="list-artist">{{ item.singer }}</span>

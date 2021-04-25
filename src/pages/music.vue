@@ -18,15 +18,17 @@
       </div>
     </div>
 
-    <div class="music-bar">
+    <div class="music-bar" :class="{ disable: !musicReady || !currentMusic.id }">
       <div class="music-bar-btns">
         <a-icon
           class="pointer"
           type="prev"
           :size="36"
+          @click="prev"
         />
         <div
           class="control-play pointer"
+          @click="play"
         >
           <a-icon :type="playing ? 'pause' : 'play'" :size="24" />
         </div>
@@ -34,12 +36,27 @@
           class="pointer"
           type="next"
           :size="36"
+          @click="next"
         />
       </div>
 
       <div class="music-music">
+        <div class="music-bar-info">
+          <template v-if="currentMusic && currentMusic.id">
+            {{ currentMusic.name }}
+            <span>- {{ currentMusic.singer }}</span>
+          </template>
+          <template v-else></template>
+        </div>
+        <div v-if="currentMusic.id" class="music-bar-time">
+          {{ currentTime | format }}/{{ currentMusic.duration % 3600 | format }}
+        </div>
         <a-progress
           class="music-progress"
+          :percent="percentMusic"
+          :percent-progress="currentProgress"
+          @percentChange="progressMusic"
+          @percentChangeEnd="progressMusicEnd"
         />
       </div>
 
@@ -48,6 +65,16 @@
         :type="getModeIconType()"
         :size="30"
       />
+      <a-icon
+        class="icon-color pointer queue-music"
+        type="ic_queue_music"
+        :size="30"
+      />
+
+      <!-- 音量控制 -->
+      <div class="music-bar-volume">
+        <volume :volume="volume" @volumeChange="volumeChange" />
+      </div>
     </div>
 
     <div class="bg" :style="{backgroundImage:`url(${wallpaper})`}"></div>
@@ -60,10 +87,12 @@ import Lyric from '@/components/lyric/lyric'
 import MusicBtn from '@/components/music-btn/music-btn'
 import AIcon from '@/base/a-icon/a-icon'
 import AProgress from '@/base/a-progress/a-progress'
+import Volume from '@/components/volume/volume'
 
 import aPlayerMusic from './aPlayer'
-import { silencePromise } from '@/utils/util'
+import { format, silencePromise } from '@/utils/util'
 import { playMode } from '@/config'
+import { getVolume, setVolume } from '@/utils/storage'
 
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -72,37 +101,51 @@ export default {
     Lyric,
     MusicBtn,
     AIcon,
-    AProgress
+    AProgress,
+    Volume
   },
   data() {
+    const volume = getVolume()
     return {
       wallpaper: require('../assets/wallpaper/wp.jpg'),
       clientStartX: 0,
-      rightWidth: 310
+      rightWidth: 310,
+      musicReady: false, // 是否可以使用播放器
+      currentTime: 0, // 当前播放时间
+      currentProgress: 0, // 当前缓冲进度
+      volume // 音量大小
     }
   },
   computed: {
+    percentMusic() {
+      const duration = this.currentMusic.duration
+      return this.currentTime && duration ? this.currentTime / duration : 0
+    },
     ...mapGetters([
       'audioEle',
       'mode',
       'playing',
+      'playlist',
+      'currentIndex',
       'currentMusic',
     ])
   },
   watch: {
     currentMusic(newMusic, oldMusic) {
-      console.log('Current music changed.')
       if (newMusic.id === oldMusic.id) {
         return
       }
-      this.audioEle.src = newMusic.url;
+      this.audioEle.src = newMusic.url
+      // 重置相关参数
+      this.lyricIndex = this.currentTime = this.currentProgress = 0
       silencePromise(this.audioEle.play())
     },
     playing(newPlaying) {
-      console.log('Play state changed.')
+      console.log("'playing' changed")
       const audio = this.audioEle
       this.$nextTick(() => {
         newPlaying ? silencePromise(audio.play()) : audio.pause()
+        this.musicReady = true
       })
     },
   },
@@ -132,13 +175,93 @@ export default {
         [playMode.loop]: 'loop-one'
       }[this.mode]
     },
+    // 上一曲
+    prev() {
+      if (!this.musicReady) {
+        return
+      }
+      if (this.playlist.length === 1) {
+        this.loop()
+      } else {
+        let index = this.currentIndex - 1
+        if (index < 0) {
+          index = this.playlist.length - 1
+        }
+        this.setCurrentIndex(index)
+        if (!this.playing && this.musicReady) {
+          this.setPlaying(true)
+        }
+        this.musicReady = false
+      }
+    },
+    // 播放暂停
+    play() {
+      if (!this.musicReady) {
+        return
+      }
+      this.setPlaying(!this.playing)
+    },
+    // 下一曲
+    // 当 flag 为 true 时，表示上一曲播放失败
+    next(flag = false) {
+      if (!this.musicReady) {
+        return
+      }
+      const {
+        playlist: { length }
+      } = this
+      if (
+        (length - 1 === this.currentIndex && this.mode === playMode.order) ||
+        (length === 1 && flag)
+      ) {
+        this.setCurrentIndex(-1)
+        this.setPlaying(false)
+        return
+      }
+      if (length === 1) {
+        this.loop()
+      } else {
+        let index = this.currentIndex + 1
+        if (index === length) {
+          index = 0
+        }
+        if (!this.playing && this.musicReady) {
+          this.setPlaying(true)
+        }
+        this.setCurrentIndex(index)
+        this.musicReady = false
+      }
+    },
+    // 循环
+    loop() {
+      this.audioEle.currentTime = 0
+      silencePromise(this.audioEle.play())
+      this.setPlaying(true)
+    },
+    // 修改音乐显示时长
+    progressMusic(percent) {
+      this.currentTime = this.currentMusic.duration * percent
+    },
+    // 修改音乐进度
+    progressMusicEnd(percent) {
+      this.audioEle.currentTime = this.currentMusic.duration * percent
+    },
+    // 修改音量大小
+    volumeChange(percent) {
+      percent === 0 ? (this.isMute = true) : (this.isMute = false)
+      this.volume = percent
+      this.audioEle.volume = percent
+      setVolume(percent)
+    },
     ...mapMutations({
       setPlaying: 'SET_PLAYING',
+      setCurrentIndex: 'SET_CURRENTINDEX',
     }),
   },
   mounted() {
     this.$nextTick(() => {
       aPlayerMusic.initAudio(this)
+      this.volumeChange(this.volume)
     })
 
     let moveDom = this.$refs.moveDom;
@@ -156,6 +279,9 @@ export default {
         document.onmousemove = null;
       };
     };
+  },
+  filters: {
+    format
   }
 }
 </script>
@@ -280,9 +406,13 @@ export default {
         top: 0;
         right: 5px;
       }
+      .music-progress {
+        margin-top: 3px;
+      }
     }
     .mode,
     .comment,
+    .queue-music,
     .music-bar-volume {
       margin-left: 20px;
     }
