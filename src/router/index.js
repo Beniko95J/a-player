@@ -11,10 +11,10 @@ const routes = [
   {
     path: '/music',
     component: () => import('@/pages/music'),
-    redirect: '/music/playlist',
+    redirect: '/music/playList',
     children: [
       {
-        path: '/music/playlist', // 正在播放列表
+        path: '/music/playList', // 正在播放列表
         component: () => import('@/pages/playList/playList'),
       },
       {
@@ -22,14 +22,19 @@ const routes = [
         component: () => import('@/pages/userList/userList'),
       },
       {
-        path: '/music/toplist', // 排行榜歌单
+        path: '/music/localList', // 我的歌单
+        component: () => import('@/pages/localList/localList'),
+      },
+      {
+        path: '/music/topList', // 排行榜歌单
         component: () => import('@/pages/topList/topList'),
       },
       {
-        path: '/music/historylist', // 我听过的列表
+        path: '/music/historyList', // 我听过的列表
         component: () => import('@/pages/historyList/historyList'),
       },
       {
+        name: 'Search',
         path: '/music/search', // 搜索
         component: () => import('@/pages/search/search'),
       }

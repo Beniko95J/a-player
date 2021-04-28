@@ -35,6 +35,7 @@
                 class="hover"
                 type="ic_playlist_add"
                 :size="40"
+                @click.stop="addItem(item,index)"
               />
             </div>
           </div>
@@ -87,6 +88,15 @@ export default {
       const res = await getMusicUrl(item.id);
       item.url = res.data.data[0].url
       this.$emit('select', item, index) // 触发点击播放事件
+    },
+    async addItem(item, index) {
+      if (this.currentMusic.id && item.id === this.currentMusic.id) {
+        return
+      }
+
+      const res = await getMusicUrl(item.id);
+      item.url = res.data.data[0].url
+      this.$emit('add', item, index) // 触发点击播放事件
     },
     deleteItem(index) {
       this.$emit('del', index) // 触发删除事件

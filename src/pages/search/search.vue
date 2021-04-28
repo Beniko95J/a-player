@@ -7,6 +7,7 @@
       ref="musicList"
       :list="list"
       @select="selectItem"
+      @add="addItem"
     />
   </div>
 </template>
@@ -42,7 +43,10 @@ export default {
     selectItem(music) {
       this.selectAddPlay(music)
     },
-    ...mapActions(['selectAddPlay'])
+    addItem(music) {
+      this.selectAdd(music)
+    },
+    ...mapActions(['selectAddPlay', 'selectAdd'])
   }
 };
 </script>
