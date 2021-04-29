@@ -26,9 +26,18 @@
                 @click.stop="selectItem(item,index)"
               />
               <a-icon
+                v-if="!isLike(item)"
                 class="hover"
                 type="ic_favorite_border"
                 :size="40"
+                @click.stop="likeItem(item)"
+              />
+              <a-icon
+                v-if="isLike(item)"
+                class="hover"
+                type="ic_favorite"
+                :size="40"
+                @click.stop="dislikeItem(item)"
               />
               <a-icon
                 v-if="listType !== 1"
@@ -61,7 +70,7 @@
 import { getMusicUrl } from '@/api'
 import { format } from '@/utils/util'
 
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 
 export default {
   props: {
@@ -76,7 +85,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['playing', 'currentMusic'])
+    ...mapGetters(['playing', 'currentMusic', 'locallist'])
   },
   methods: {
     async selectItem(item, index) {
@@ -85,18 +94,26 @@ export default {
         return
       }
 
+      console.log('select')
       const res = await getMusicUrl(item.id);
       item.url = res.data.data[0].url
       this.$emit('select', item, index) // 触发点击播放事件
+    },
+    likeItem(item) {
+      this.selectLike(item)
+    },
+    dislikeItem(item) {
+      this.selectDislike(item)
     },
     async addItem(item, index) {
       if (this.currentMusic.id && item.id === this.currentMusic.id) {
         return
       }
 
+      console.log('add')
       const res = await getMusicUrl(item.id);
       item.url = res.data.data[0].url
-      this.$emit('add', item, index) // 触发点击播放事件
+      this.$emit('add', item, index) // 触发添加事件
     },
     deleteItem(index) {
       this.$emit('del', index) // 触发删除事件
@@ -108,9 +125,16 @@ export default {
       } = this
       return playing && id === itemId ? 'pause-mini' : 'play-mini'
     },
+    isLike(item) {
+      let index = this.locallist.findIndex(song => {
+        return song.id == item.id
+      })
+      return index >= 0 ? true : false
+    },
     ...mapMutations({
       setPlaying: 'SET_PLAYING'
-    })
+    }),
+    ...mapActions(['selectLike', 'selectDislike'])
   },
   filters: {
     format
@@ -140,9 +164,9 @@ export default {
 .list-item {
   display: flex;
   width: 100%;
-  height: 50px;
+  height: 60px;
   border-bottom: 1px solid @list_item_line_color;
-  line-height: 50px;
+  line-height: 60px;
   overflow: hidden;
 
   &.list-item-no {

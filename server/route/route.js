@@ -5,12 +5,18 @@ module.exports = app => {
 
   router.post('/add', async (req, res) => {
     console.log(req.body);
-    const model = await Song.create(req.body);
-    res.send(model);
+    const result = await Song.find({id: req.body.id})
+    if (result.length != 0) {
+      res.send('避免重复收藏同一首歌')
+    }
+    else  {
+      const model = await Song.create(req.body);
+      res.send(model);
+    }
   });
 
   router.get('/list', async (req, res) => {
-    const items = await Song.find().limit(30);
+    const items = await Song.find();
     res.send(items);
   });
 

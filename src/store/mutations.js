@@ -17,6 +17,10 @@ const mutations = {
   [types.SET_PLAYLIST](state, playlist) {
     state.playlist = playlist
   },
+  // 修改本地收藏列表
+  [types.SET_LOCALLIST](state, locallist) {
+    state.locallist = locallist
+  },
   // 修改当前音乐索引
   [types.SET_CURRENTINDEX](state, currentIndex) {
     state.currentIndex = currentIndex

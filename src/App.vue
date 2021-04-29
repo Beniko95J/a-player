@@ -7,8 +7,11 @@
 </template>
 
 <script>
-import AHeader from '@/components/a-header/a-header';
-import { mapMutations } from 'vuex';
+import AHeader from '@/components/a-header/a-header'
+
+import { getLocalMusicList } from '@/api'
+
+import { mapMutations } from 'vuex'
 
 export default {
   components: {
@@ -16,12 +19,15 @@ export default {
   },
   methods: {
     ...mapMutations({
-      setAudioele: 'SET_AUDIOELE'
+      setAudioele: 'SET_AUDIOELE',
+      setLocalList: 'SET_LOCALLIST'
     })
   },
   created() {
-    this.$nextTick(() => {
-      this.setAudioele(this.$refs.aPlayer);
+    this.$nextTick(async () => {
+      this.setAudioele(this.$refs.aPlayer)
+      const response = await getLocalMusicList()
+      this.setLocalList(response.data)
     })
   }
 };

@@ -4,7 +4,7 @@
       <div class="music-left">
         <music-btn></music-btn>
         <keep-alive>
-          <router-view></router-view>
+          <router-view name="default"></router-view>
         </keep-alive>
       </div>
 
@@ -326,7 +326,7 @@ export default {
     }
   }
 
-  /*底部mmPlayer-bar*/
+  /*底部aPlayer-bar*/
   .music-bar {
     display: flex;
     align-items: center;

@@ -6,6 +6,8 @@ export const mode = state => state.mode
 export const playing = state => state.playing
 // 播放列表
 export const playlist = state => state.playlist
+// 本地收藏列表
+export const locallist = state => state.locallist
 // 当前音乐索引
 export const currentIndex = state => state.currentIndex
 // 当前音乐

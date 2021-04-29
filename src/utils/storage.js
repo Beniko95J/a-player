@@ -27,7 +27,7 @@ const storage = {
  * 音量
  * @type VOLUME_KEY：key值
  */
- const VOLUME_KEY = '__mmPlayer_volume__'
+ const VOLUME_KEY = '__aPlayer_volume__'
  // 获取音量
  export function getVolume() {
    const volume = storage.get(VOLUME_KEY, defaultVolume)

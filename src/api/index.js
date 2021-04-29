@@ -1,4 +1,5 @@
 import axios from '@/utils/axios'
+import {localRequest} from '@/utils/axios'
 import { defaultLimit } from '@/config'
 
 // 搜索
@@ -19,4 +20,19 @@ export function getMusicUrl(id) {
       id
     }
   })
+}
+
+// 添加收藏
+export function like(song) {
+  return localRequest.post('/add', song)
+}
+
+// 取消收藏
+export function dislike(song) {
+  return localRequest.delete(`/delete/${song.id}`)
+}
+
+// 获取收藏歌单
+export function getLocalMusicList() {
+  return localRequest.get('/list')
 }
