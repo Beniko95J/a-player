@@ -7,11 +7,12 @@ function filterSinger(singers) {
 }
 
 export class Song {
-  constructor({ id, name, singer, album, imageId, duration, url }) {
+  constructor({ id, name, singer, album, albumId, imageId, duration, url }) {
     this.id = id
     this.name = name
     this.singer = singer
     this.album = album
+    this.albumId = albumId
     this.imageId = imageId
     this.duration = duration
     this.url = url
@@ -24,6 +25,7 @@ export function createPlayList(music) {
     name: music.name,
     singer: music.artists.length > 0 && filterSinger(music.artists),
     album: music.album.name,
+    albumId: music.album.id,
     imageId: music.album.picId || null,
     duration: music.duration / 1000,
     url: `https://autumnfish.cn/song/url?id=${music.id}`

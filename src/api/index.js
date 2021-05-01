@@ -22,6 +22,24 @@ export function getMusicUrl(id) {
   })
 }
 
+// 获取专辑信息
+export function getAlbum(id) {
+  return axios.get('/album', {
+    params: {
+      id
+    }
+  })
+}
+
+// 获取歌词
+export function getLyric(id) {
+  return axios.get('/lyric', {
+    params: {
+      id
+    }
+  })
+}
+
 // 添加收藏
 export function like(song) {
   return localRequest.post('/add', song)

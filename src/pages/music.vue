@@ -14,7 +14,12 @@
       </div>
 
       <div class="music-right" :style="{width: `${rightWidth}px`}">
-        <lyric></lyric>
+        <lyric
+          ref="lyric"
+          :lyric="lyric"
+          :nolyric="nolyric"
+          :lyric-index="lyricIndex"
+        />
       </div>
     </div>
 
@@ -77,7 +82,7 @@
       </div>
     </div>
 
-    <div class="bg" :style="{backgroundImage:`url(${wallpaper})`}"></div>
+    <div class="bg" :style="{backgroundImage: picUrl}"></div>
     <div class="mask"></div>
   </div>
 </template>
@@ -90,9 +95,10 @@ import AProgress from '@/base/a-progress/a-progress'
 import Volume from '@/components/volume/volume'
 
 import aPlayerMusic from './aPlayer'
-import { format, silencePromise } from '@/utils/util'
+import { format, silencePromise, parseLyric } from '@/utils/util'
 import { playMode } from '@/config'
 import { getVolume, setVolume } from '@/utils/storage'
+import { getLyric } from '@/api'
 
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -113,10 +119,19 @@ export default {
       musicReady: false, // 是否可以使用播放器
       currentTime: 0, // 当前播放时间
       currentProgress: 0, // 当前缓冲进度
-      volume // 音量大小
+      volume, // 音量大小
+      isMute: false, // 是否静音
+      lyric: [], // 歌词
+      nolyric: false, // 是否有歌词
+      lyricIndex: 0, // 当前播放歌词下标
     }
   },
   computed: {
+    picUrl() {
+      return this.currentMusic.id && this.currentMusic.albumImg
+      ? `url(${this.currentMusic.albumImg}?param=300y300)`
+      : `url(${this.wallpaper})`
+    },
     percentMusic() {
       const duration = this.currentMusic.duration
       return this.currentTime && duration ? this.currentTime / duration : 0
@@ -132,6 +147,10 @@ export default {
   },
   watch: {
     currentMusic(newMusic, oldMusic) {
+      if (!newMusic.id) {
+        this.lyric = []
+        return
+      }
       if (newMusic.id === oldMusic.id) {
         return
       }
@@ -139,6 +158,9 @@ export default {
       // 重置相关参数
       this.lyricIndex = this.currentTime = this.currentProgress = 0
       silencePromise(this.audioEle.play())
+      this.$nextTick(() => {
+        this._getLyric(newMusic.id)
+      })
     },
     playing(newPlaying) {
       console.log("'playing' changed")
@@ -147,6 +169,18 @@ export default {
         newPlaying ? silencePromise(audio.play()) : audio.pause()
         this.musicReady = true
       })
+    },
+    currentTime(newTime) {
+      if (this.nolyric) {
+        return
+      }
+      let lyricIndex = 0
+      for (let i = 0; i < this.lyric.length; i++) {
+        if (newTime > this.lyric[i].time) {
+          lyricIndex = i
+        }
+      }
+      this.lyricIndex = lyricIndex
     },
   },
   methods: {
@@ -237,6 +271,9 @@ export default {
       this.audioEle.currentTime = 0
       silencePromise(this.audioEle.play())
       this.setPlaying(true)
+      if (this.lyric.length > 0) {
+        this.lyricIndex = 0
+      }
     },
     // 修改音乐显示时长
     progressMusic(percent) {
@@ -252,6 +289,19 @@ export default {
       this.volume = percent
       this.audioEle.volume = percent
       setVolume(percent)
+    },
+    // 获取歌词
+    _getLyric(id) {
+      getLyric(id).then(res => {
+        console.log(res)
+        if (res.data.nolyric) {
+          this.nolyric = true
+        } else {
+          this.nolyric = false
+          this.lyric = parseLyric(res.data.lrc.lyric)
+        }
+        silencePromise(this.audioEle.play())
+      })
     },
     ...mapMutations({
       setPlaying: 'SET_PLAYING',
@@ -444,6 +494,7 @@ export default {
     background-size: cover;
     filter: blur(5px);
     opacity: 0.7;
+    transition: 1s;
   }
 }
 </style>

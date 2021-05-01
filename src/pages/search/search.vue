@@ -31,14 +31,13 @@ export default {
     }
   },
   methods: {
-    onEnter() {
+    async onEnter() {
       if (this.searchValue.replace(/(^\s+)|(\s+$)/g, '') === '') {
-        console.log('搜索内容不能为空！');
-        return;
+        console.log('搜索内容不能为空！')
+        return
       }
-      search(this.searchValue).then(res => {
-        this.list = formatSongs(res.data.result.songs);
-      })
+      const res = await search(this.searchValue)
+      this.list = formatSongs(res.data.result.songs)
     },
     selectItem(music) {
       this.selectAddPlay(music)

@@ -13,7 +13,7 @@ export const selectAdd = function({ commit, state }, music) {
   // 查询当前播放列表是否有代插入的音乐，并返回其索引值
   let index = findIndex(list, music)
   if (index < 0) {
-    list.unshift(music)
+    list.push(music)
     commit(types.SET_PLAYLIST, list)
   }
 }

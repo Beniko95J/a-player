@@ -13,7 +13,6 @@
           :key="item.id"
           class="list-item"
           :class="{'on':playing&&currentMusic.id===item.id}"
-          @dblclick="selectItem(item,index,$event)"
         >
           <span class="list-num" v-text="index+1"></span>
           <div class="list-name">
@@ -67,7 +66,7 @@
 </template>
 
 <script>
-import { getMusicUrl } from '@/api'
+import { getMusicUrl, getAlbum } from '@/api'
 import { format } from '@/utils/util'
 
 import { mapGetters, mapMutations, mapActions } from 'vuex'
@@ -94,9 +93,9 @@ export default {
         return
       }
 
-      console.log('select')
       const res = await getMusicUrl(item.id);
       item.url = res.data.data[0].url
+      item.albumImg = await this.getAlbumImg(item.albumId)
       this.$emit('select', item, index) // 触发点击播放事件
     },
     likeItem(item) {
@@ -110,9 +109,9 @@ export default {
         return
       }
 
-      console.log('add')
-      const res = await getMusicUrl(item.id);
+      const res = await getMusicUrl(item.id)
       item.url = res.data.data[0].url
+      item.albumImg = await this.getAlbumImg(item.albumId)
       this.$emit('add', item, index) // 触发添加事件
     },
     deleteItem(index) {
@@ -130,6 +129,10 @@ export default {
         return song.id == item.id
       })
       return index >= 0 ? true : false
+    },
+    async getAlbumImg(albumId) {
+      const res = await getAlbum(albumId)
+      return res.data.album.picUrl
     },
     ...mapMutations({
       setPlaying: 'SET_PLAYING'
