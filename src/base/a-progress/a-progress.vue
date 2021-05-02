@@ -47,7 +47,7 @@ export default {
     },
     percentProgress(newValue) {
       let offsetWidth = this.$refs.aProgress.clientWidth * newValue
-      this.$refs.mmPercentProgress.style.width = `${offsetWidth}px`
+      this.$refs.aPercentProgress.style.width = `${offsetWidth}px`
     }
   },
   methods: {

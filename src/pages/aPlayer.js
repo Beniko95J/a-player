@@ -5,7 +5,19 @@ const aPlayerMusic = {
     const ele = that.audioEle
     // 音频缓冲事件
     ele.onprogress = () => {
-      
+      try {
+        if (ele.buffered.length > 0) {
+          const duration = that.currentMusic.duration
+          let buffered = 0
+          ele.buffered.end(0)
+          buffered =
+            ele.buffered.end(0) > duration ? duration : ele.buffered.end(0)
+          that.currentProgress = buffered / duration
+          console.log(that.currentProgress)
+        }
+      } catch (e) {
+        console.log(e)
+      }
     }
     // 开始播放音乐
     ele.onplay = () => {
