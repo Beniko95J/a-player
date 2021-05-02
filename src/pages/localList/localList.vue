@@ -1,5 +1,6 @@
 <template>
   <div class="localList">
+    <a-loading v-model="aLoadShow"></a-loading>
     <music-list
       :list="locallist"
       @select="selectItem"
@@ -10,14 +11,21 @@
 
 <script>
 import MusicList from '@/components/music-list/music-list'
+import ALoading from '@/base/a-loading/a-loading'
 
 import { getLocalMusicList } from '@/api'
 
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
+  data() {
+    return {
+      aLoadShow: true
+    }
+  },
   components: {
-    MusicList
+    MusicList,
+    ALoading
   },
   computed: {
     ...mapGetters(['locallist'])
@@ -34,6 +42,7 @@ export default {
   async created() {
     const result = await getLocalMusicList()
     this.list = result.data
+    this.aLoadShow = false
   },
   async activated() {
     const result = await getLocalMusicList()

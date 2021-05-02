@@ -1,5 +1,6 @@
 <template>
   <div class="search">
+    <a-loading v-model="aLoadShow"></a-loading>
     <div class="search-head">
       <input v-model.trim="searchValue" type="text" placeholder="音乐/歌手" class="search-input" @keyup.enter="onEnter">
     </div>
@@ -14,6 +15,7 @@
 
 <script>
 import MusicList from '@/components/music-list/music-list'
+import ALoading from '@/base/a-loading/a-loading'
 
 import {search} from '@/api'
 import formatSongs from '@/utils/song'
@@ -22,12 +24,14 @@ import { mapActions } from 'vuex'
 
 export default {
   components: {
-    MusicList
+    MusicList,
+    ALoading
   },
   data() {
     return {
       searchValue: '',
-      list: []
+      list: [],
+      aLoadShow: false
     }
   },
   methods: {
@@ -36,8 +40,10 @@ export default {
         console.log('搜索内容不能为空！')
         return
       }
+      this.aLoadShow = true;
       const res = await search(this.searchValue)
       this.list = formatSongs(res.data.result.songs)
+      this.aLoadShow = false;
     },
     selectItem(music) {
       this.selectAddPlay(music)
