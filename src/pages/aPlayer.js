@@ -13,7 +13,6 @@ const aPlayerMusic = {
           buffered =
             ele.buffered.end(0) > duration ? duration : ele.buffered.end(0)
           that.currentProgress = buffered / duration
-          console.log(that.currentProgress)
         }
       } catch (e) {
         console.log(e)
