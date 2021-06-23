@@ -6,9 +6,11 @@
       @select="selectItem"
       @del="deleteItem"
     >
-      <div slot="listBtn" class="list-btn">
-        <span>清空列表</span>
-      </div>
+      <template v-slot:listBtn>
+        <div class="list-btn">
+          <span>清空列表</span>
+        </div>
+      </template>
     </music-list>
   </div>
 </template>

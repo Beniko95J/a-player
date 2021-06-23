@@ -7,7 +7,7 @@
         <span v-if="listType === 1" class="list-time">时长</span>
         <span v-else class="list-album">专辑</span>
       </div>
-      <div class="list-content">
+      <div ref="listContent" class="list-content" @scroll="listScroll($event)">
         <div 
           v-for="(item, index) in list"
           :key="item.id"
@@ -83,10 +83,26 @@ export default {
       default: 0
     }
   },
+  data() {
+    return {
+      listScroll: throttle((e) => {
+        const scrollTop = e.target.scrollTop
+        this.scrollTop = scrollTop
+        const { scrollHeight, offsetHeight } = e.target
+        if (scrollTop + offsetHeight >= scrollHeight - 50) {
+          console.log('trigger')
+          this.$emit('pullup')
+        }
+      }, 100)
+    }
+  },
   computed: {
     ...mapGetters(['playing', 'currentMusic', 'locallist'])
   },
   methods: {
+    scrollTo() {
+      this.$refs.listContent.scrollTop = 0
+    },
     async selectItem(item, index) {
       if (this.currentMusic.id && item.id === this.currentMusic.id) {
         this.setPlaying(!this.playing)
@@ -143,6 +159,17 @@ export default {
     format
   }
 }
+
+function throttle(func, wait) {
+    let lastTime
+    return function(...rest) {
+        if (!lastTime ||
+          (new Date().getTime() - lastTime > wait)) {
+            lastTime = +new Date()
+            func.apply(this, rest)
+        }
+    }
+}
 </script>
 
 <style lang="less" scoped>
@@ -160,7 +187,7 @@ export default {
   width: 100%;
   height: calc(~'100% - 60px');
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
 }
 

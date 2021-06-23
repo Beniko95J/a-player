@@ -9,6 +9,7 @@
       :list="list"
       @select="selectItem"
       @add="addItem"
+      @pullup="pullUpLoad"
     />
   </div>
 </template>
@@ -31,7 +32,8 @@ export default {
     return {
       searchValue: '',
       list: [],
-      aLoadShow: false
+      aLoadShow: false,
+      page: 0
     }
   },
   methods: {
@@ -40,10 +42,26 @@ export default {
         console.log('搜索内容不能为空！')
         return
       }
-      this.aLoadShow = true;
+      this.aLoadShow = true
+      this.page = 0
+      if (this.list.length > 0) {
+        this.$refs.musicList.scrollTo()
+      }
       const res = await search(this.searchValue)
       this.list = formatSongs(res.data.result.songs)
       this.aLoadShow = false;
+    },
+    async pullUpLoad() {
+      this.page += 1
+      this.aLoadShow = true
+      const res = await search(this.searchValue, this.page)
+      if (!res.data.result.songs) {
+        console.log('No more songs!')
+        this.aLoadShow = false
+        return
+      }
+      this.list = [...this.list, ...formatSongs(res.data.result.songs)]
+      this.aLoadShow = false
     },
     selectItem(music) {
       this.selectAddPlay(music)

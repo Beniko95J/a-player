@@ -25,24 +25,11 @@
 
     <div class="music-bar" :class="{ disable: !musicReady || !currentMusic.id }">
       <div class="music-bar-btns">
-        <a-icon
-          class="pointer"
-          type="prev"
-          :size="36"
-          @click="prev"
-        />
-        <div
-          class="control-play pointer"
-          @click="play"
-        >
+        <a-icon class="pointer" type="prev" :size="36" @click="prev"/>
+        <div class="control-play pointer" @click="play">
           <a-icon :type="playing ? 'pause' : 'play'" :size="24" />
         </div>
-        <a-icon
-          class="pointer"
-          type="next"
-          :size="36"
-          @click="next"
-        />
+        <a-icon class="pointer" type="next" :size="36" @click="next"/>
       </div>
 
       <div class="music-music">
@@ -293,8 +280,7 @@ export default {
     // 获取歌词
     _getLyric(id) {
       getLyric(id).then(res => {
-        console.log(res)
-        if (res.data.nolyric) {
+        if (res.data.lrc === undefined) {
           this.nolyric = true
         } else {
           this.nolyric = false
